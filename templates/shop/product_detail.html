@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% block title %}{{ product.name }}{% endblock %}
+{% block content %}
+<a href="{% url 'shop:product_list' %}" class="btn btn-sm btn-outline-secondary mb-3">← Назад</a>
+<div class="row g-4">
+<div class="col-md-5">
+    {% if product.image %}<img src="{{ product.image.url }}" class="img-fluid rounded shadow">
+    {% else %}<div class="d-flex align-items-center justify-content-center rounded shadow" style="height:300px;background:#f8f0e8"><i class="bi bi-cake2 fs-1 text-muted"></i></div>{% endif %}
+</div>
+<div class="col-md-7">
+    <div class="card border-0 shadow-sm p-4">
+        <div class="d-flex justify-content-between">
+            <h2>{{ product.name }}</h2>
+            {% if user.is_staff or user.role == 'employee' %}
+            <div>
+                <a href="{% url 'shop:product_update' product.pk %}" class="btn btn-sm btn-outline-warning"><i class="bi bi-pencil"></i></a>
+                {% if user.is_staff %}<a href="{% url 'shop:product_delete' product.pk %}" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></a>{% endif %}
+            </div>
+            {% endif %}
+        </div>
+        <div class="d-flex gap-2 mb-3">
+            <span class="badge bg-secondary">{{ product.product_type }}</span>
+            {% if product.is_featured %}<span class="badge bg-warning text-dark">Хит продаж</span>{% endif %}
+            <span class="badge {% if product.is_available %}bg-success{% else %}bg-danger{% endif %}">{% if product.is_available %}В наличии{% else %}Нет в наличии{% endif %}</span>
+        </div>
+        <h3 class="price-tag">{{ product.price }} руб./{{ product.get_unit_display }}</h3>
+        <hr>
+        <p>{{ product.description }}</p>
+        {% if product.composition %}<p><strong>Состав:</strong> {{ product.composition }}</p>{% endif %}
+        {% if product.weight %}<p><strong>Вес:</strong> {{ product.weight }} г</p>{% endif %}
+        {% if product.calories %}<p><strong>Калорийность:</strong> {{ product.calories }} ккал/100г</p>{% endif %}
+        {% if product.tags.all %}
+        <div class="mt-2">{% for tag in product.tags.all %}<span class="badge bg-light text-dark border me-1">{{ tag }}</span>{% endfor %}</div>
+        {% endif %}
+        <hr>
+        <div class="d-flex justify-content-between text-muted small">
+            <span>Добавлено: {{ product.created_at|date:"d/m/Y" }}</span>
+            <span>Обновлено: {{ product.updated_at|date:"d/m/Y H:i" }}</span>
+            <span><i class="bi bi-eye"></i> {{ product.views_count }}</span>
+        </div>
+    </div>
+</div>
+</div>
+{% if similar %}
+<h4 class="mt-4 mb-3">Похожие изделия</h4>
+<div class="row g-3">
+{% for p in similar %}
+<div class="col-md-3">
+    <div class="card border-0 shadow-sm product-card">
+        {% if p.image %}<img src="{{ p.image.url }}" class="card-img-top" style="height:120px;object-fit:cover">{% endif %}
+        <div class="card-body p-2">
+            <p class="fw-bold mb-1 small">{{ p.name }}</p>
+            <div class="d-flex justify-content-between">
+                <small class="price-tag" style="font-size:.9rem">{{ p.price }} руб.</small>
+                <a href="{% url 'shop:product_detail' p.pk %}" class="btn btn-sm btn-outline-primary py-0">→</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+</div>
+{% endif %}
+{% endblock %}

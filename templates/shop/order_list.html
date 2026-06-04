@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% block title %}Заказы{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2><i class="bi bi-bag"></i> Заказы
+    {% if user.role == 'employee' %}<small class="text-muted fs-6 ms-2">— незавершённые</small>{% endif %}
+    </h2>
+    {% if user.is_authenticated %}
+    <a href="{% url 'shop:order_create' %}" class="btn btn-primary">
+        <i class="bi bi-plus-circle"></i>
+        {% if user.role == 'client' %}Оформить заказ{% else %}Новый заказ{% endif %}
+    </a>
+    {% endif %}
+</div>
+{% if user.is_staff or user.role == 'employee' %}
+<form method="get" class="mb-3 d-flex gap-2">
+    <input type="text" name="search" value="{{ search }}" placeholder="Поиск по клиенту..." class="form-control" style="max-width:300px">
+    <select name="sort" class="form-select" style="max-width:200px">
+        <option value="-order_date" {% if request.GET.sort == '-order_date' %}selected{% endif %}>Сначала новые</option>
+        <option value="order_date" {% if request.GET.sort == 'order_date' %}selected{% endif %}>Сначала старые</option>
+        <option value="total_price" {% if request.GET.sort == 'total_price' %}selected{% endif %}>Сумма ↑</option>
+        <option value="-total_price" {% if request.GET.sort == '-total_price' %}selected{% endif %}>Сумма ↓</option>
+    </select>
+    <button type="submit" class="btn btn-primary">Найти</button>
+    <a href="{% url 'shop:order_list' %}" class="btn btn-outline-secondary">Сброс</a>
+</form>
+{% endif %}
+<div class="table-responsive">
+<table class="table table-hover shadow-sm">
+<thead class="table-dark"><tr><th>#</th><th>Клиент</th><th>Статус</th><th>Доставка</th><th>Сумма</th><th>Дата</th><th></th></tr></thead>
+<tbody>
+{% for o in page_obj %}
+<tr>
+    <td><a href="{% url 'shop:order_detail' o.pk %}">#{{ o.pk }}</a></td>
+    <td>{{ o.customer.full_name }}</td>
+    <td><span class="badge {% if o.status == 'delivered' %}bg-success{% elif o.status == 'cancelled' %}bg-danger{% elif o.status == 'new' %}bg-secondary{% else %}bg-warning text-dark{% endif %}">{{ o.get_status_display }}</span></td>
+    <td>{{ o.get_delivery_type_display }}</td>
+    <td>{{ o.total_price }} руб.</td>
+    <td>{{ o.order_date|date:"d/m/Y H:i" }}</td>
+    <td>
+        {% if user.is_staff or user.role == 'employee' %}
+        <a href="{% url 'shop:order_update' o.pk %}" class="btn btn-sm btn-outline-warning"><i class="bi bi-pencil"></i></a>
+        {% if user.is_staff or user.role == 'employee' %}<a href="{% url 'shop:order_delete' o.pk %}" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></a>{% endif %}
+        {% elif user.role == 'client' and o.status == 'new' %}
+        <a href="{% url 'shop:order_detail' o.pk %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></a>
+        {% endif %}
+    </td>
+</tr>
+{% empty %}<tr><td colspan="7" class="text-center text-muted py-4">Заказов нет.</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+{% if page_obj.has_other_pages %}
+<nav><ul class="pagination">
+{% if page_obj.has_previous %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">«</a></li>{% endif %}
+<li class="page-item active"><span class="page-link">{{ page_obj.number }}</span></li>
+{% if page_obj.has_next %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">»</a></li>{% endif %}
+</ul></nav>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block title %}Точки самовывоза{% endblock %}
+{% block content %}
+<h2><i class="bi bi-shop"></i> Точки самовывоза</h2>
+<div class="row g-3">
+{% for pp in points %}
+<div class="col-md-4">
+    <div class="card border-0 shadow-sm">
+        <div class="card-body">
+            <h5>{{ pp.name }}</h5>
+            <p><i class="bi bi-geo-alt"></i> {{ pp.address }}, {{ pp.city }}</p>
+            {% if pp.phone %}<p><i class="bi bi-telephone"></i> {{ pp.phone }}</p>{% endif %}
+            {% if pp.working_hours %}<p><i class="bi bi-clock"></i> {{ pp.working_hours }}</p>{% endif %}
+        </div>
+    </div>
+</div>
+{% empty %}<div class="col"><p class="text-muted">Информация обновляется.</p></div>
+{% endfor %}
+{% endblock %}

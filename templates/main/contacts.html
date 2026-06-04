@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block title %}Контакты{% endblock %}
+{% block content %}
+<h2><i class="bi bi-telephone"></i> Контакты</h2>
+<div class="row g-4">
+<div class="col-md-5">
+    {% if company %}
+    <div class="card border-0 shadow-sm p-4 mb-3">
+        <h5>{{ company.name }}</h5>
+        <p><i class="bi bi-geo-alt"></i> {{ company.address }}</p>
+        <p><i class="bi bi-telephone"></i> {{ company.phone }}</p>
+        <p><i class="bi bi-envelope"></i> {{ company.email }}</p>
+    </div>
+    {% endif %}
+    {% if weather %}<div class="card border-0 shadow-sm p-3 mb-3"><p class="mb-0"><i class="bi bi-cloud-sun"></i> Минск: <strong>{{ weather.temp }}°C</strong> — {{ weather.desc }}</p></div>{% endif %}
+    <div class="card border-0 shadow-sm p-3">
+        <h6><i class="bi bi-shop"></i> Точки самовывоза</h6>
+        {% for pp in pickup_points %}<p class="mb-1 small"><strong>{{ pp.name }}</strong><br>{{ pp.address }}<br><span class="text-muted">{{ pp.working_hours }}</span></p>{% endfor %}
+    </div>
+</div>
+<div class="col-md-7">
+    <h5>Наши мастера</h5>
+    {% for emp in employees %}
+    <div class="card border-0 shadow-sm mb-2 p-3">
+        <div class="d-flex align-items-center gap-3">
+            {% if emp.photo %}<img src="{{ emp.photo.url }}" class="rounded-circle" style="width:50px;height:50px;object-fit:cover">
+            {% else %}<div class="rounded-circle d-flex align-items-center justify-content-center" style="width:50px;height:50px;background:var(--pk)"><i class="bi bi-person text-white"></i></div>{% endif %}
+            <div>
+                <strong>{{ emp.full_name }}</strong><br>
+                <small class="text-muted">{{ emp.get_position_display }}</small>
+                {% if emp.phone %} | <small>{{ emp.phone }}</small>{% endif %}
+                {% if emp.email %} | <small>{{ emp.email }}</small>{% endif %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+</div>
+{% endblock %}

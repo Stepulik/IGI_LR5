@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+{% block title %}Многозадачность{% endblock %}
+{% block content %}
+<h2><i class="bi bi-cpu"></i> Дополнительное задание — Многозадачность</h2>
+<p class="text-muted mb-4">Три подхода к параллельному выполнению задач в Python: Threading, Multiprocessing, Asyncio.</p>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header" style="background:var(--dark);color:white"><i class="bi bi-layers"></i> A: Threading</div>
+            <div class="card-body">
+                <p class="small">Продажа мест на мастер-класс. <code>threading.Lock</code> защищает общий счётчик от гонки данных.</p>
+                <a href="?run=a" class="btn btn-sm btn-primary w-100">▶ Запустить</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-success text-white"><i class="bi bi-diagram-3"></i> B: Multiprocessing</div>
+            <div class="card-body">
+                <p class="small">Расчёт SHA-256 для 40 позиций заказов через 4 процесса. Обходит GIL для CPU-задач.</p>
+                <a href="?run=b" class="btn btn-sm btn-success w-100">▶ Запустить</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-warning text-dark"><i class="bi bi-arrow-repeat"></i> C: Asyncio</div>
+            <div class="card-body">
+                <p class="small">Параллельная валидация QR-кодов 20 заказов через <code>asyncio.gather</code>.</p>
+                <a href="?run=c" class="btn btn-sm btn-warning w-100">▶ Запустить</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="text-center mb-4">
+    <a href="?run=all" class="btn btn-dark btn-lg"><i class="bi bi-play-circle"></i> Запустить все три</a>
+    <a href="?" class="btn btn-outline-secondary btn-lg ms-2">Сброс</a>
+</div>
+
+<!-- ═══ A: Threading ═══ -->
+{% if threading_result %}
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header" style="background:var(--dark);color:white">
+        <i class="bi bi-layers"></i> Threading — Мастер-класс: продажа мест
+    </div>
+    <div class="card-body">
+        <div class="row g-3 mb-3">
+            <div class="col-md-4"><div class="card stat-card p-2 text-center"><div class="text-muted small">Всего мест</div><div class="fs-4 fw-bold">{{ threading_result.total }}</div></div></div>
+            <div class="col-md-4"><div class="card stat-card p-2 text-center"><div class="text-muted small">Продано</div><div class="fs-4 fw-bold text-success">{{ threading_result.sold }}</div></div></div>
+            <div class="col-md-4"><div class="card stat-card p-2 text-center"><div class="text-muted small">Осталось</div><div class="fs-4 fw-bold text-warning">{{ threading_result.remaining }}</div></div></div>
+        </div>
+        <div class="bg-dark text-light rounded p-3" style="font-size:.85rem;max-height:250px;overflow-y:auto;font-family:monospace">
+            {% for line in threading_result.log %}<div>{{ line }}</div>{% endfor %}
+        </div>
+        <div class="alert alert-info mt-3 mb-0">
+            <strong>threading.Lock</strong> — гарантирует, что в критической секции (проверка + продажа) находится только один поток. Без lock возможна <em>гонка данных</em> (race condition): два потока одновременно видят свободное место и оба продают его.
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- ═══ B: Multiprocessing ═══ -->
+{% if mp_result %}
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-success text-white">
+        <i class="bi bi-diagram-3"></i> Multiprocessing — SHA-256 партий заказов
+    </div>
+    <div class="card-body">
+        <p class="text-muted">Обработано <strong>{{ mp_result.count }}</strong> позиций за <strong>{{ mp_result.elapsed }}с</strong> через 4 процесса (ProcessPoolExecutor)</p>
+        <div class="table-responsive" style="max-height:250px;overflow-y:auto">
+            <table class="table table-sm table-striped">
+                <thead class="table-dark sticky-top"><tr><th>Позиция</th><th>SHA-256 (первые 16 симв.)</th></tr></thead>
+                <tbody>
+                {% for r in mp_result.results %}
+                <tr><td class="small">{{ r.label }}</td><td class="font-monospace small">{{ r.hash }}</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="alert alert-success mt-3 mb-0">
+            <strong>ProcessPoolExecutor</strong> создаёт отдельные процессы — каждый со своим интерпретатором. GIL не мешает: настоящий параллелизм на нескольких ядрах CPU. Подходит для CPU-интенсивных задач.
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- ═══ C: Asyncio ═══ -->
+{% if asyncio_result %}
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-warning text-dark">
+        <i class="bi bi-arrow-repeat"></i> Asyncio — валидация QR-кодов заказов
+    </div>
+    <div class="card-body">
+        <div class="row g-3 mb-3">
+            <div class="col-md-4"><div class="card stat-card p-2 text-center"><div class="text-muted small">Проверено</div><div class="fs-4 fw-bold">{{ asyncio_result.total }}</div></div></div>
+            <div class="col-md-4"><div class="card stat-card p-2 text-center"><div class="text-muted small">Действительных</div><div class="fs-4 fw-bold text-success">{{ asyncio_result.valid }}</div></div></div>
+            <div class="col-md-4"><div class="card stat-card p-2 text-center"><div class="text-muted small">Время</div><div class="fs-4 fw-bold text-info">{{ asyncio_result.elapsed }}с</div></div></div>
+        </div>
+        <div class="table-responsive" style="max-height:300px;overflow-y:auto">
+            <table class="table table-sm">
+                <thead class="table-dark sticky-top"><tr><th>Заказ</th><th>QR-код</th><th>Статус</th></tr></thead>
+                <tbody>
+                {% for r in asyncio_result.results %}
+                <tr class="{% if r.valid %}table-success{% else %}table-danger{% endif %}">
+                    <td>#{{ r.order_id }}</td>
+                    <td class="font-monospace small">{{ r.qr_code }}</td>
+                    <td>{{ r.status }}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="alert alert-warning mt-3 mb-0">
+            <strong>asyncio.gather</strong> запускает все корутины параллельно в одном потоке через event loop. Идеально для I/O-задач (HTTP, БД, файлы) — тысячи одновременных ожиданий без создания потоков.
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% if not threading_result and not mp_result and not asyncio_result %}
+<div class="alert alert-secondary text-center mt-3">
+    <i class="bi bi-info-circle"></i> Выберите задачу выше или нажмите «Запустить все три».
+</div>
+{% endif %}
+{% endblock %}

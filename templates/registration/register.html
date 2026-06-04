@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+{% block title %}Регистрация — СладкийДом{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+<div class="col-lg-8 col-md-10">
+
+<div style="text-align:center;margin-bottom:32px">
+    <h2 style="font-family:var(--serif);font-weight:700;font-size:2rem;color:var(--choco);margin-bottom:6px">Создать аккаунт</h2>
+    <p style="font-family:var(--body-font);color:var(--bark)">Заполните все поля для регистрации</p>
+</div>
+
+<div class="form-panel">
+    <div class="form-panel-body">
+        <form method="post" id="regForm" novalidate>{% csrf_token %}
+
+        <div class="row g-3 mb-3">
+            {% for field in form %}
+            {% if field.name == 'first_name' %}
+            <div class="col-md-6">
+                <label class="form-label">{{ field.label }} <span style="color:var(--terra)">*</span></label>
+                {{ field }}
+                {% if field.errors %}<div style="font-family:var(--body-font);font-size:.8rem;color:var(--terra);margin-top:4px">{% for e in field.errors %}{{ e }}{% endfor %}</div>{% endif %}
+            </div>
+            {% endif %}
+            {% if field.name == 'last_name' %}
+            <div class="col-md-6">
+                <label class="form-label">{{ field.label }} <span style="color:var(--terra)">*</span></label>
+                {{ field }}
+                {% if field.errors %}<div style="font-family:var(--body-font);font-size:.8rem;color:var(--terra);margin-top:4px">{% for e in field.errors %}{{ e }}{% endfor %}</div>{% endif %}
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+
+        <div class="row g-3 mb-3">
+            {% for field in form %}
+            {% if field.name == 'username' %}
+            <div class="col-md-6">
+                <label class="form-label">{{ field.label }} <span style="color:var(--terra)">*</span></label>
+                {{ field }}
+                {% if field.help_text %}<div style="font-family:var(--body-font);font-size:.78rem;color:var(--bark);margin-top:4px">{{ field.help_text }}</div>{% endif %}
+                {% if field.errors %}<div style="font-family:var(--body-font);font-size:.8rem;color:var(--terra);margin-top:4px">{% for e in field.errors %}{{ e }}{% endfor %}</div>{% endif %}
+            </div>
+            {% endif %}
+            {% if field.name == 'email' %}
+            <div class="col-md-6">
+                <label class="form-label">{{ field.label }} <span style="color:var(--terra)">*</span></label>
+                {{ field }}
+                {% if field.errors %}<div style="font-family:var(--body-font);font-size:.8rem;color:var(--terra);margin-top:4px">{% for e in field.errors %}{{ e }}{% endfor %}</div>{% endif %}
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+
+        <div class="row g-3 mb-3">
+            {% for field in form %}
+            {% if field.name == 'phone' %}
+            <div class="col-md-6">
+                <label class="form-label">{{ field.label }}</label>
+                {{ field }}
+                {% if field.help_text %}<div style="font-family:var(--body-font);font-size:.78rem;color:var(--bark);margin-top:4px">{{ field.help_text }}</div>{% endif %}
+                {% if field.errors %}<div style="font-family:var(--body-font);font-size:.8rem;color:var(--terra);margin-top:4px">{% for e in field.errors %}{{ e }}{% endfor %}</div>{% endif %}
+            </div>
+            {% endif %}
+            {% if field.name == 'birth_date' %}
+            <div class="col-md-6">
+                <label class="form-label">{{ field.label }} <i class="bi bi-info-circle" style="color:var(--bark)" title="Должно быть 18+"></i></label>
+                {{ field }}
+                {% if field.errors %}<div style="font-family:var(--body-font);font-size:.8rem;color:var(--terra);margin-top:4px">{% for e in field.errors %}{{ e }}{% endfor %}</div>{% endif %}
+                <div style="font-family:var(--body-font);font-size:.8rem;color:var(--terra);margin-top:4px;display:none" id="bdErr">
+                    <i class="bi bi-exclamation-circle"></i> Возраст должен быть не менее 18 лет
+                </div>
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+
+        <div class="row g-3 mb-4">
+            {% for field in form %}
+            {% if field.name == 'password1' %}
+            <div class="col-md-6">
+                <label class="form-label">{{ field.label }} <span style="color:var(--terra)">*</span></label>
+                {{ field }}
+                {% if field.help_text %}<div style="font-family:var(--body-font);font-size:.78rem;color:var(--bark);margin-top:4px">{{ field.help_text }}</div>{% endif %}
+                {% if field.errors %}<div style="font-family:var(--body-font);font-size:.8rem;color:var(--terra);margin-top:4px">{% for e in field.errors %}{{ e }}{% endfor %}</div>{% endif %}
+            </div>
+            {% endif %}
+            {% if field.name == 'password2' %}
+            <div class="col-md-6">
+                <label class="form-label">{{ field.label }} <span style="color:var(--terra)">*</span></label>
+                {{ field }}
+                {% if field.errors %}<div style="font-family:var(--body-font);font-size:.8rem;color:var(--terra);margin-top:4px">{% for e in field.errors %}{{ e }}{% endfor %}</div>{% endif %}
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center">
+            <p style="font-family:var(--body-font);font-size:.9rem;color:var(--bark);margin:0">
+                Уже есть аккаунт? <a href="{% url 'users:login' %}" style="color:var(--terra);font-weight:600">Войти →</a>
+            </p>
+            <button type="submit" class="btn-terra" style="padding:12px 36px">
+                Зарегистрироваться
+            </button>
+        </div>
+
+        </form>
+    </div>
+</div>
+
+</div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('regForm').addEventListener('submit', function(e) {
+    const bd = document.getElementById('id_birth_date');
+    if (!bd || !bd.value) return;
+    const age18 = new Date(new Date(bd.value).setFullYear(new Date(bd.value).getFullYear() + 18));
+    if (new Date() < age18) {
+        e.preventDefault();
+        document.getElementById('bdErr').style.display = 'block';
+        bd.closest('.col-md-6').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+});
+const bdField = document.getElementById('id_birth_date');
+if (bdField) {
+    bdField.addEventListener('change', function() {
+        const age18 = new Date(new Date(this.value).setFullYear(new Date(this.value).getFullYear() + 18));
+        const err = document.getElementById('bdErr');
+        err.style.display = new Date() < age18 ? 'block' : 'none';
+    });
+}
+</script>
+{% endblock %}

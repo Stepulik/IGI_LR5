@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block title %}О нас{% endblock %}
+{% block content %}
+<h2><i class="bi bi-cake2"></i> О кондитерской</h2>
+{% if company %}
+<div class="row g-4">
+    <div class="col-md-8">
+        <div class="card border-0 shadow-sm p-4">
+            {% if company.logo %}<img src="{{ company.logo.url }}" height="80" class="mb-3">{% endif %}
+            <h4>{{ company.name }}</h4>
+            <p>{{ company.description }}</p>
+            <ul class="list-unstyled">
+                <li><strong>Основана:</strong> {{ company.founded_year }}</li>
+                <li><strong>Адрес:</strong> {{ company.address }}</li>
+                <li><strong>Телефон:</strong> {{ company.phone }}</li>
+                <li><strong>Email:</strong> {{ company.email }}</li>
+                {% if company.inn %}<li><strong>УНП:</strong> {{ company.inn }}</li>{% endif %}
+            </ul>
+        </div>
+    </div>
+    {% if company.history %}
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm p-4 h-100">
+            <h5><i class="bi bi-clock-history"></i> История</h5>
+            <p>{{ company.history|linebreaks }}</p>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endif %}
+<h3 class="mt-5 mb-3"><i class="bi bi-people"></i> Наша команда</h3>
+<div class="row g-3">
+{% for emp in employees %}
+<div class="col-md-3">
+    <div class="card border-0 shadow-sm text-center p-3">
+        {% if emp.photo %}<img src="{{ emp.photo.url }}" class="rounded-circle mx-auto mb-2" style="width:80px;height:80px;object-fit:cover">
+        {% else %}<div class="mx-auto mb-2 rounded-circle d-flex align-items-center justify-content-center" style="width:80px;height:80px;background:var(--pk)"><i class="bi bi-person fs-2 text-white"></i></div>{% endif %}
+        <h6 class="mb-1">{{ emp.full_name }}</h6>
+        <p class="text-muted small mb-1">{{ emp.get_position_display }}</p>
+        {% if emp.phone %}<p class="small">{{ emp.phone }}</p>{% endif %}
+    </div>
+</div>
+{% endfor %}
+</div>
+{% endblock %}

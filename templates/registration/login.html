@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block title %}Вход — СладкийДом{% endblock %}
+{% block content %}
+<div style="min-height:65vh;display:flex;align-items:center;justify-content:center">
+<div style="width:100%;max-width:400px">
+
+    <div style="text-align:center;margin-bottom:32px">
+        <div style="font-family:var(--serif);font-weight:900;font-size:1.8rem;color:var(--choco)">СладкийДом</div>
+        <h2 style="font-family:var(--serif);font-weight:700;font-size:2rem;color:var(--choco);margin:12px 0 6px">Добро пожаловать</h2>
+        <p style="font-family:var(--body-font);color:var(--bark);font-size:.95rem;margin:0">Войдите в свой аккаунт</p>
+    </div>
+
+    <form method="post">{% csrf_token %}
+    {% for field in form %}
+    <div style="margin-bottom:24px;position:relative">
+        <label style="font-family:var(--body-font);font-size:.75rem;text-transform:uppercase;letter-spacing:.5px;color:var(--bark);display:block;margin-bottom:4px">{{ field.label }}</label>
+        {{ field }}
+        {% if field.errors %}<div style="font-family:var(--body-font);font-size:.8rem;color:var(--terra);margin-top:4px">{{ field.errors }}</div>{% endif %}
+    </div>
+    {% endfor %}
+
+    {% if form.non_field_errors %}
+    <div class="alert alert-danger py-2" style="font-size:.85rem">
+        <i class="bi bi-exclamation-triangle me-1"></i>{{ form.non_field_errors }}
+    </div>
+    {% endif %}
+
+    <button type="submit" class="btn-terra" style="width:100%;padding:14px;font-size:1rem;margin-top:8px">
+        Войти
+    </button>
+    </form>
+
+    <div style="border-top:1px solid var(--sand);margin:24px 0"></div>
+    <p style="text-align:center;font-family:var(--body-font);font-size:.9rem;color:var(--bark);margin:0">
+        Нет аккаунта? <a href="{% url 'users:register' %}" style="color:var(--terra);font-weight:600">Зарегистрироваться →</a>
+    </p>
+</div>
+</div>
+{% endblock %}

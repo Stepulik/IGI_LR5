@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+{% block title %}Личный кабинет — СладкийДом{% endblock %}
+{% block content %}
+
+<div class="row g-4">
+<!-- Левая колонка: аватар + инфо -->
+<div class="col-md-4">
+    <div class="form-panel h-100">
+        <div class="form-panel-header text-center">
+            <i class="bi bi-person-circle fs-1 d-block mb-1"></i>
+            <h6 class="mb-0">Мой профиль</h6>
+        </div>
+        <div class="form-panel-body text-center">
+            {% if user.avatar %}
+            <img src="{{ user.avatar.url }}" class="rounded-circle mb-3"
+                 style="width:100px;height:100px;object-fit:cover;border:4px solid var(--pk3)">
+            {% else %}
+            <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                 style="width:100px;height:100px;background:var(--pk3);border:4px solid var(--pk)">
+                <span style="font-size:2.2rem;color:var(--pk);font-weight:800">
+                    {{ user.username|first|upper }}
+                </span>
+            </div>
+            {% endif %}
+            <h5 class="fw-bold mb-0">{{ user.get_full_name|default:user.username }}</h5>
+            <span class="badge rounded-pill mt-1 mb-3 badge-type">{{ user.get_role_display }}</span>
+            <hr style="border-color:var(--pk3)">
+            <ul class="list-unstyled text-start small">
+                <li class="mb-2"><i class="bi bi-at me-2" style="color:var(--pk)"></i>{{ user.username }}</li>
+                <li class="mb-2"><i class="bi bi-envelope me-2" style="color:var(--pk)"></i>{{ user.email|default:"—" }}</li>
+                {% if user.phone %}<li class="mb-2"><i class="bi bi-telephone me-2" style="color:var(--pk)"></i>{{ user.phone }}</li>{% endif %}
+                {% if user.birth_date %}<li class="mb-2"><i class="bi bi-cake2 me-2" style="color:var(--pk)"></i>{{ user.birth_date|date:"d/m/Y" }}</li>{% endif %}
+                {% if user.address %}<li class="mb-2"><i class="bi bi-geo-alt me-2" style="color:var(--pk)"></i>{{ user.address }}</li>{% endif %}
+                <li><i class="bi bi-calendar-check me-2" style="color:var(--pk)"></i>C {{ user.created_at|date:"d/m/Y" }}</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- Правая колонка: форма редактирования -->
+<div class="col-md-8">
+    <div class="form-panel mb-4">
+        <div class="form-panel-header d-flex align-items-center gap-2">
+            <i class="bi bi-pencil-square fs-5"></i>
+            <h6 class="mb-0">Редактировать данные</h6>
+        </div>
+        <div class="form-panel-body">
+            <form method="post" enctype="multipart/form-data" id="profileForm" novalidate>{% csrf_token %}
+            <div class="row g-3">
+            {% for field in form %}
+                {% if field.name in 'first_name,last_name,email,phone,birth_date,address' %}
+                <div class="col-md-6">
+                {% else %}
+                <div class="col-12">
+                {% endif %}
+                    <label class="form-label">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}<div class="text-danger small mt-1">{{ field.errors }}</div>{% endif %}
+                    {% if field.name == 'birth_date' %}
+                    <div class="text-danger small mt-1 d-none" id="bdErrP">
+                        <i class="bi bi-exclamation-circle"></i> Возраст должен быть не менее 18 лет
+                    </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+            </div>
+            <hr style="border-color:var(--pk3)">
+            <div class="text-end">
+                <button type="submit" class="btn btn-pk px-5">
+                    <i class="bi bi-check2 me-1"></i> Сохранить изменения
+                </button>
+            </div>
+            </form>
+        </div>
+    </div>
+
+    {% if orders %}
+    <div class="card border-0 shadow-sm">
+        <div class="card-header fw-bold" style="background:var(--pk3);color:var(--pk)">
+            <i class="bi bi-bag-heart me-2"></i>Последние заказы
+        </div>
+        <ul class="list-group list-group-flush">
+        {% for o in orders %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            <div>
+                <span class="fw-semibold">Заказ #{{ o.pk }}</span>
+                <span class="text-muted small ms-2">{{ o.order_date|date:"d/m/Y" }}</span><br>
+                <small class="text-muted">{{ o.get_status_display }} · {{ o.get_delivery_type_display }}</small>
+            </div>
+            <span class="price-badge">{{ o.total_price }} руб.</span>
+        </li>
+        {% endfor %}
+        </ul>
+        <div class="card-footer bg-white text-center">
+            <a href="{% url 'shop:order_list' %}" class="btn btn-pk-outline btn-sm px-4">Все заказы</a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+const bdP = document.getElementById('id_birth_date');
+if (bdP) bdP.addEventListener('change', function() {
+    const age18 = new Date(new Date(this.value).setFullYear(new Date(this.value).getFullYear() + 18));
+    const err = document.getElementById('bdErrP');
+    if (new Date() < age18) { err.classList.remove('d-none'); this.classList.add('is-invalid'); }
+    else { err.classList.add('d-none'); this.classList.remove('is-invalid'); this.classList.add('is-valid'); }
+});
+</script>
+{% endblock %}

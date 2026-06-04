@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block title %}Оформить заказ — СладкийДом{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+<div class="col-lg-7">
+<div class="form-panel">
+    <div class="form-panel-header d-flex align-items-center gap-3">
+        <i class="bi bi-bag-plus fs-4"></i>
+        <div>
+            <h5 class="mb-0">Оформить заказ</h5>
+            <small style="opacity:.8">Выберите изделие и способ доставки</small>
+        </div>
+    </div>
+    <div class="form-panel-body">
+        <form method="post">{% csrf_token %}
+        <div class="row g-3">
+        {% for field in form %}
+        <div class="col-md-{% if field.name == 'comment' or field.name == 'delivery_address' %}12{% else %}6{% endif %}">
+            <label class="form-label fw-semibold">{{ field.label }}</label>
+            {{ field }}
+            {% if field.errors %}<div class="text-danger small mt-1">{{ field.errors }}</div>{% endif %}
+        </div>
+        {% endfor %}
+        </div>
+        <div class="alert alert-info mt-3 mb-0">
+            <i class="bi bi-info-circle me-2"></i>
+            Стоимость доставки: <strong>5 руб.</strong> Самовывоз — бесплатно.
+        </div>
+        <hr>
+        <div class="d-flex gap-2 justify-content-end">
+            <a href="{% url 'shop:product_list' %}" class="btn btn-outline-secondary px-4">Отмена</a>
+            <button type="submit" class="btn btn-primary px-5">
+                <i class="bi bi-check2 me-1"></i> Оформить
+            </button>
+        </div>
+        </form>
+    </div>
+</div>
+</div>
+</div>
+{% endblock %}

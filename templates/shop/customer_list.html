@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block title %}Клиенты{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2><i class="bi bi-people"></i> Клиенты</h2>
+    <a href="{% url 'shop:customer_create' %}" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Добавить</a>
+</div>
+<form method="get" class="mb-3 d-flex gap-2">
+    <input type="text" name="search" value="{{ search }}" placeholder="Поиск по имени или телефону..." class="form-control" style="max-width:300px">
+    <select name="sort" class="form-select" style="max-width:200px">
+        <option value="last_name">По фамилии А-Я</option>
+        <option value="-created_at">Сначала новые</option>
+    </select>
+    <button type="submit" class="btn btn-primary">Найти</button>
+    <a href="{% url 'shop:customer_list' %}" class="btn btn-outline-secondary">Сброс</a>
+</form>
+<div class="table-responsive">
+<table class="table table-hover shadow-sm">
+<thead class="table-dark"><tr><th>ФИО</th><th>Телефон</th><th>Email</th><th>Адрес</th><th>Заказов</th><th>Добавлен</th><th></th></tr></thead>
+<tbody>
+{% for c in page_obj %}
+<tr>
+    <td>{{ c.last_name }} {{ c.first_name }}</td>
+    <td>{{ c.phone }}</td>
+    <td>{{ c.email }}</td>
+    <td>{{ c.address }}</td>
+    <td>{{ c.orders.count }}</td>
+    <td>{{ c.created_at|date:"d/m/Y" }}</td>
+    <td>
+        <a href="{% url 'shop:customer_update' c.pk %}" class="btn btn-sm btn-outline-warning"><i class="bi bi-pencil"></i></a>
+        {% if user.is_staff %}<a href="{% url 'shop:customer_delete' c.pk %}" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></a>{% endif %}
+    </td>
+</tr>
+{% empty %}<tr><td colspan="7" class="text-center text-muted py-4">Клиентов нет.</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+{% endblock %}

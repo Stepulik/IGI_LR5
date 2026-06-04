@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block title %}Изменить заказ #{{ order.pk }}{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+<div class="col-lg-7">
+<div class="form-panel">
+    <div class="form-panel-header d-flex align-items-center gap-3">
+        <i class="bi bi-pencil-square fs-4"></i>
+        <div>
+            <h5 class="mb-0">Изменить заказ #{{ order.pk }}</h5>
+            <small style="opacity:.8">Можно изменить только новые заказы</small>
+        </div>
+    </div>
+    <div class="form-panel-body">
+        <form method="post">{% csrf_token %}
+        <div class="row g-3">
+        <div class="col-md-6">
+            <label class="form-label fw-semibold">Тип доставки</label>
+            {{ form.delivery_type }}
+        </div>
+        <div class="col-md-6">
+            <label class="form-label fw-semibold">Адрес доставки</label>
+            {{ form.delivery_address }}
+        </div>
+        <div class="col-12">
+            <label class="form-label fw-semibold">Комментарий</label>
+            {{ form.comment }}
+        </div>
+        {% if form.non_field_errors %}
+        <div class="col-12"><div class="text-danger small">{{ form.non_field_errors }}</div></div>
+        {% endif %}
+        </div>
+        <hr>
+        <div class="d-flex gap-2 justify-content-end">
+            <a href="{% url 'shop:order_detail' order.pk %}" class="btn btn-outline-secondary px-4">Отмена</a>
+            <button type="submit" class="btn btn-primary px-5"><i class="bi bi-check2 me-1"></i> Сохранить</button>
+        </div>
+        </form>
+    </div>
+</div>
+</div>
+</div>
+{% endblock %}

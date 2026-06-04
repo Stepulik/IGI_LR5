@@ -1,0 +1,19 @@
+services:
+  web:
+    build: .
+    image: confectionery-web:latest
+    ports:
+      - "8000:8000"
+    volumes:
+      - media_data:/app/media
+      - log_data:/app/logs
+      - sqlite_data:/app/db
+    environment:
+      - DJANGO_SETTINGS_MODULE=confectionery.settings
+      - LOG_LEVEL=INFO
+    restart: unless-stopped
+
+volumes:
+  media_data:
+  log_data:
+  sqlite_data:

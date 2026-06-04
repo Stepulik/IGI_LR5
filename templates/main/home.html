@@ -1,0 +1,166 @@
+{% extends 'base.html' %}
+{% block title %}СладкийДом — Кондитерская ручной работы{% endblock %}
+{% block content %}
+
+<!-- Hero -->
+<div style="margin: 0 calc(-50vw + 50%); min-height: 92vh; background-color: var(--sand);
+     background-image: url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Ccircle cx='20' cy='20' r='3' fill='none' stroke='%23C1440E' stroke-width='1' stroke-opacity='0.06'/%3E%3Cpath d='M60 10 Q65 5 70 10 Q65 15 60 10z' fill='%23C1440E' fill-opacity='0.05'/%3E%3Ccircle cx='95' cy='70' r='2' fill='%23C1440E' fill-opacity='0.06'/%3E%3Cpath d='M30 80 Q35 75 40 80 Q35 85 30 80z' fill='%23C1440E' fill-opacity='0.04'/%3E%3Cpath d='M80 40 L82 35 L84 40' stroke='%23C1440E' stroke-width='1' fill='none' stroke-opacity='0.05'/%3E%3C/svg%3E\");
+     display: flex; align-items: center; padding: 60px 0;">
+    <div class="container">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center;">
+
+            <!-- Left: text -->
+            <div>
+                <div style="font-family:var(--body-font);font-size:.72rem;letter-spacing:4px;text-transform:uppercase;color:var(--bark);margin-bottom:20px">
+                    МИНСК · С 2015
+                </div>
+                <h1 style="font-family:var(--serif);font-weight:900;font-size:clamp(2.6rem,6vw,4.8rem);color:var(--choco);line-height:1.05;margin-bottom:16px">
+                    Торты и сладости<br>
+                    <span style="font-style:italic;color:var(--terra)">ручной работы</span>
+                </h1>
+                <p style="font-family:var(--body-font);font-size:1.05rem;color:var(--bark);max-width:420px;margin-bottom:32px;line-height:1.7">
+                    Авторские изделия из натуральных ингредиентов. Доставка по Минску и удобный самовывоз из точек по всему городу.
+                </p>
+                <div style="display:flex;align-items:center;gap:24px;flex-wrap:wrap">
+                    <a href="{% url 'shop:product_list' %}" class="btn-terra" style="font-size:1rem;padding:14px 32px">Смотреть каталог</a>
+                    <a href="{% url 'shop:contacts' %}" style="font-family:var(--body-font);font-weight:600;color:var(--terra);text-decoration:none;font-size:1rem">Заказать торт →</a>
+                </div>
+            </div>
+
+            <!-- Right: decorative circles -->
+            <div class="d-none d-lg-flex" style="justify-content:center;align-items:center;position:relative;height:420px">
+                <div style="width:420px;height:420px;border-radius:50%;background:var(--terra);opacity:.1;position:absolute"></div>
+                <div style="width:320px;height:320px;border-radius:50%;border:3px solid var(--terra);opacity:.18;position:absolute"></div>
+                <div style="width:200px;height:200px;border-radius:50%;border:2px solid var(--terra);opacity:.12;position:absolute"></div>
+                <!-- SVG cake illustration -->
+                <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" style="position:absolute;opacity:.55">
+                    <rect x="15" y="70" width="90" height="35" rx="4" stroke="#C1440E" stroke-width="2.5" fill="none"/>
+                    <rect x="25" y="50" width="70" height="22" rx="3" stroke="#C1440E" stroke-width="2" fill="none"/>
+                    <path d="M30 50 Q45 40 60 50 Q75 40 90 50" stroke="#C1440E" stroke-width="2" fill="none"/>
+                    <line x1="40" y1="50" x2="40" y2="30" stroke="#C1440E" stroke-width="1.8"/>
+                    <line x1="60" y1="50" x2="60" y2="28" stroke="#C1440E" stroke-width="1.8"/>
+                    <line x1="80" y1="50" x2="80" y2="30" stroke="#C1440E" stroke-width="1.8"/>
+                    <circle cx="40" cy="28" r="3" fill="#C1440E"/>
+                    <circle cx="60" cy="26" r="3" fill="#C1440E"/>
+                    <circle cx="80" cy="28" r="3" fill="#C1440E"/>
+                </svg>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Метрики -->
+<div class="stat-grid mb-5 mt-0" style="margin-left:calc(-50vw + 50%);margin-right:calc(-50vw + 50%)">
+    <div class="stat-card-new">
+        <div class="stat-num">{{ stats.products }}</div>
+        <div class="stat-label">Изделий в меню</div>
+    </div>
+    <div class="stat-card-new">
+        <div class="stat-num">{{ stats.orders }}</div>
+        <div class="stat-label">Заказов доставлено</div>
+    </div>
+    <div class="stat-card-new">
+        <div class="stat-num">{{ stats.customers }}</div>
+        <div class="stat-label">Довольных клиентов</div>
+    </div>
+    <div class="stat-card-new">
+        <div class="stat-num">{{ stats.types }}</div>
+        <div class="stat-label">Видов изделий</div>
+    </div>
+</div>
+
+<div class="row g-4 mb-5">
+    <!-- Последняя новость -->
+    {% if latest_article %}
+    <div class="col-lg-7">
+        <div class="card h-100 overflow-hidden" style="border-radius:8px">
+            {% if latest_article.image %}
+            <img src="{{ latest_article.image.url }}" style="height:260px;width:100%;object-fit:cover">
+            {% else %}
+            <div class="d-flex align-items-center justify-content-center"
+                 style="height:200px;background:var(--sand)">
+                <i class="bi bi-newspaper" style="font-size:4rem;color:var(--bark);opacity:.4"></i>
+            </div>
+            {% endif %}
+            <div class="card-body p-4">
+                <span style="font-family:var(--body-font);text-transform:uppercase;font-size:.72rem;letter-spacing:2px;color:var(--terra);font-weight:600">Последняя новость</span>
+                <h3 class="fw-bold mt-2 mb-2" style="font-family:var(--serif);color:var(--choco)">{{ latest_article.title }}</h3>
+                <p style="color:var(--bark);font-family:var(--body-font)">{{ latest_article.summary }}</p>
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <small style="color:var(--bark);font-family:var(--body-font)"><i class="bi bi-calendar3 me-1"></i>{{ latest_article.created_at|date:"d/m/Y" }}</small>
+                    <a href="{% url 'shop:news_detail' latest_article.pk %}" class="btn-terra-outline" style="font-size:.85rem;padding:6px 18px">Читать далее</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- API-блоки -->
+    <div class="col-lg-5">
+        {% if exchange_data %}
+        <div class="card mb-3">
+            <div class="card-body p-4">
+                <h6 style="font-family:var(--body-font);text-transform:uppercase;letter-spacing:1.5px;font-weight:700;font-size:.72rem;color:var(--bark);margin-bottom:16px">
+                    <i class="bi bi-currency-exchange me-1"></i> Курс к рублю (BYN)
+                </h6>
+                <div class="row g-3 text-center">
+                    <div class="col-4"><div style="font-family:var(--body-font);font-size:.75rem;color:var(--bark)">USD</div><div style="font-family:var(--serif);font-size:1.5rem;font-weight:700;color:var(--terra)">{{ exchange_data.USD }}</div></div>
+                    <div class="col-4"><div style="font-family:var(--body-font);font-size:.75rem;color:var(--bark)">EUR</div><div style="font-family:var(--serif);font-size:1.5rem;font-weight:700;color:var(--terra)">{{ exchange_data.EUR }}</div></div>
+                    <div class="col-4"><div style="font-family:var(--body-font);font-size:.75rem;color:var(--bark)">RUB</div><div style="font-family:var(--serif);font-size:1.5rem;font-weight:700;color:var(--terra)">{{ exchange_data.RUB }}</div></div>
+                </div>
+                <small style="font-family:var(--body-font);color:var(--bark);display:block;text-align:center;margin-top:10px">обновлено {{ now|date:"d/m/Y H:i" }}</small>
+            </div>
+        </div>
+        {% endif %}
+        {% if food_fact %}
+        <div class="card" style="border-left:4px solid var(--terra)">
+            <div class="card-body p-4">
+                <h6 style="font-family:var(--body-font);text-transform:uppercase;letter-spacing:1.5px;font-weight:700;font-size:.72rem;color:var(--bark);margin-bottom:10px">
+                    <i class="bi bi-stars me-1"></i> Факт дня
+                </h6>
+                <p style="margin:0;font-family:var(--serif);font-size:1.1rem;font-style:italic;color:var(--bark)">{{ food_fact }}</p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Хиты продаж -->
+<div class="page-header text-center mb-4">
+    <h2>Хиты продаж</h2>
+</div>
+
+<!-- Horizontal product list -->
+<div style="display:flex;flex-direction:column;gap:0;border:1px solid var(--sand);border-radius:8px;overflow:hidden;margin-bottom:3rem">
+{% for p in featured %}
+<div class="product-card-h">
+    {% if p.image %}
+    <img src="{{ p.image.url }}" alt="{{ p.name }}">
+    {% else %}
+    <div class="placeholder-img">
+        <i class="bi bi-cake2" style="font-size:2.5rem;color:var(--bark);opacity:.4"></i>
+    </div>
+    {% endif %}
+    <div class="card-body">
+        <div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px">
+                <span class="badge rounded-pill badge-type" style="font-size:.72rem">{{ p.product_type }}</span>
+                {% if p.is_featured %}<span class="badge rounded-pill badge-hit" style="font-size:.72rem">★ Хит</span>{% endif %}
+                {% if not p.is_available %}<span class="badge rounded-pill bg-secondary" style="font-size:.72rem">Нет в наличии</span>{% endif %}
+            </div>
+            <p class="product-name">{{ p.name }}</p>
+            <p class="product-desc">{{ p.description|truncatewords:14 }}</p>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+            <span class="product-price">{{ p.price }} <span style="font-size:.9rem;font-weight:400">руб.</span></span>
+            <a href="{% url 'shop:product_detail' p.pk %}" class="btn-detail">Подробнее</a>
+        </div>
+    </div>
+</div>
+{% empty %}
+<div style="padding:40px;text-align:center;font-family:var(--body-font);color:var(--bark)">Пока нет изделий в наличии.</div>
+{% endfor %}
+</div>
+
+{% endblock %}

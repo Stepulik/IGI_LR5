@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% block title %}Заказ #{{ order.pk }}{% endblock %}
+{% block content %}
+<a href="{% url 'shop:order_list' %}" class="btn btn-sm btn-outline-secondary mb-3">← Назад</a>
+<div class="row g-4">
+<div class="col-md-8">
+    <div class="card border-0 shadow-sm p-4">
+        <div class="d-flex justify-content-between">
+            <h3>Заказ #{{ order.pk }}</h3>
+            <span class="badge fs-6 {% if order.status == 'delivered' %}bg-success{% elif order.status == 'cancelled' %}bg-danger{% else %}bg-warning text-dark{% endif %}">{{ order.get_status_display }}</span>
+        </div>
+        <p class="text-muted">{{ order.order_date|date:"d/m/Y H:i" }}</p>
+        <hr>
+        <h5>Состав заказа:</h5>
+        <table class="table table-sm">
+            <thead><tr><th>Изделие</th><th>Цена</th><th>Кол-во</th><th>Сумма</th></tr></thead>
+            <tbody>
+            {% for item in order.items.all %}
+            <tr>
+                <td><a href="{% url 'shop:product_detail' item.product.pk %}">{{ item.product.name }}</a></td>
+                <td>{{ item.price }} руб.</td>
+                <td>{{ item.quantity }}</td>
+                <td>{{ item.subtotal }} руб.</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        <hr>
+        <div class="row">
+            <div class="col text-end">
+                <p class="mb-1">Доставка: <strong>{{ order.delivery_cost }} руб.</strong></p>
+                {% if order.discount_amount %}<p class="mb-1 text-success">Скидка: -{{ order.discount_amount }} руб.</p>{% endif %}
+                <h5>Итого: <strong>{{ order.total_price }} руб.</strong></h5>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="col-md-4">
+    <div class="card border-0 shadow-sm p-3 mb-3">
+        <h6 class="fw-bold">Клиент</h6>
+        <p class="mb-1">{{ order.customer.full_name }}</p>
+        <p class="mb-1 small">{{ order.customer.phone }}</p>
+        <p class="mb-1 small">{{ order.customer.email }}</p>
+    </div>
+    <div class="card border-0 shadow-sm p-3 mb-3">
+        <h6 class="fw-bold">Доставка</h6>
+        <p class="mb-1">{{ order.get_delivery_type_display }}</p>
+        {% if order.delivery_address %}<p class="mb-1 small">{{ order.delivery_address }}</p>{% endif %}
+        {% if order.delivery_date %}<p class="mb-1 small">Дата: {{ order.delivery_date|date:"d/m/Y" }}</p>{% endif %}
+    </div>
+    {% if order.comment %}
+    <div class="card border-0 shadow-sm p-3 mb-3">
+        <h6 class="fw-bold">Комментарий</h6>
+        <p class="small mb-0">{{ order.comment }}</p>
+    </div>
+    {% endif %}
+    <!-- Actions based on role -->
+    {% if user.is_staff or user.role == 'admin' %}
+    <a href="{% url 'shop:order_update' order.pk %}" class="btn btn-outline-warning w-100 mb-2"><i class="bi bi-pencil"></i> Редактировать</a>
+    <a href="{% url 'shop:order_delete' order.pk %}" class="btn btn-outline-danger w-100"><i class="bi bi-trash"></i> Удалить</a>
+    {% elif user.role == 'employee' %}
+    <a href="{% url 'shop:order_update' order.pk %}" class="btn btn-outline-warning w-100"><i class="bi bi-pencil"></i> Редактировать</a>
+    {% elif user.is_authenticated %}
+    {% if order.status == 'new' %}
+    <a href="{% url 'shop:order_update' order.pk %}" class="btn btn-outline-warning w-100 mb-2"><i class="bi bi-pencil"></i> Изменить</a>
+    <form method="post" action="{% url 'shop:order_cancel' order.pk %}">{% csrf_token %}
+        <button type="submit" class="btn btn-outline-danger w-100" onclick="return confirm('Отменить заказ?')">
+            <i class="bi bi-x-circle"></i> Отменить заказ
+        </button>
+    </form>
+    {% endif %}
+    {% endif %}
+</div>
+</div>
+{% endblock %}

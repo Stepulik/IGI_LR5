@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+{% block title %}Статистика{% endblock %}
+{% block content %}
+
+<div class="page-header mb-4">
+    <h2>Статистика кондитерской</h2>
+</div>
+
+<!-- Timezone & calendar -->
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:24px;margin-bottom:32px">
+    <div style="border-left:3px solid var(--sand);padding-left:16px">
+        <div style="font-family:var(--body-font);font-size:.72rem;text-transform:uppercase;letter-spacing:1px;color:var(--bark);margin-bottom:4px">UTC (БД)</div>
+        <div class="font-monospace" style="font-size:.9rem;color:var(--choco)">{{ utc_now|date:"d/m/Y H:i:s" }}</div>
+    </div>
+    <div style="border-left:3px solid var(--sand);padding-left:16px">
+        <div style="font-family:var(--body-font);font-size:.72rem;text-transform:uppercase;letter-spacing:1px;color:var(--bark);margin-bottom:4px">Europe/Minsk</div>
+        <div class="font-monospace" style="font-size:.9rem;color:var(--terra)">{{ local_now|date:"d/m/Y H:i:s" }}</div>
+    </div>
+    <div style="border-left:3px solid var(--sand);padding-left:16px">
+        <div style="font-family:var(--body-font);font-size:.72rem;text-transform:uppercase;letter-spacing:1px;color:var(--bark);margin-bottom:4px">Календарь</div>
+        <pre style="font-size:.72rem;margin:0;color:var(--choco)">{{ text_calendar }}</pre>
+    </div>
+    <div style="border-left:3px solid var(--sand);padding-left:16px;display:flex;align-items:center">
+        <a href="{% url 'shop:chart_python' %}" class="btn-terra" style="font-size:.85rem;padding:10px 20px;width:100%;text-align:center">
+            <i class="bi bi-graph-up me-1"></i> Графики Python
+        </a>
+    </div>
+</div>
+
+<!-- KPI -->
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:24px;margin-bottom:40px">
+    <div class="kpi-card">
+        <div class="kpi-num">{{ delivered_count }}</div>
+        <div class="kpi-label">Выполненных заказов</div>
+    </div>
+    <div class="kpi-card">
+        <div class="kpi-num">{{ total_revenue|floatformat:0 }}</div>
+        <div class="kpi-label">Общая выручка (руб.)</div>
+    </div>
+    <div class="kpi-card">
+        <div class="kpi-num">{{ avg_order|floatformat:0 }}</div>
+        <div class="kpi-label">Средний чек (руб.)</div>
+    </div>
+    <div class="kpi-card">
+        <div class="kpi-num">{{ total_delivery|floatformat:0 }}</div>
+        <div class="kpi-label">Выручка с доставки (руб.)</div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <div class="card p-3">
+            <h6 style="font-family:var(--serif);font-weight:700;color:var(--choco);margin-bottom:12px">По статусам заказов</h6>
+            <canvas id="statusChart" height="220"></canvas>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card p-3">
+            <h6 style="font-family:var(--serif);font-weight:700;color:var(--choco);margin-bottom:12px">Доставка vs Самовывоз</h6>
+            <canvas id="deliveryChart" height="220"></canvas>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card p-3">
+            <h6 style="font-family:var(--serif);font-weight:700;color:var(--choco);margin-bottom:12px">Изделия по видам</h6>
+            <canvas id="typeChart" height="220"></canvas>
+        </div>
+    </div>
+</div>
+
+<div class="card p-4 mb-4">
+    <h6 style="font-family:var(--serif);font-weight:700;color:var(--choco);margin-bottom:16px">Динамика выручки по месяцам</h6>
+    <canvas id="monthlyChart" height="90"></canvas>
+</div>
+
+
+<div class="card p-3">
+    <h6 style="font-family:var(--serif);font-weight:700;color:var(--choco);margin-bottom:12px">Топ-10 изделий по продажам</h6>
+            <table class="table table-sm table-terra">
+                <thead><tr><th>Изделие</th><th>Продано</th></tr></thead>
+                <tbody>
+                {% for p in top_products %}
+                <tr><td style="font-family:var(--body-font);font-size:.9rem">{{ p.product__name }}</td><td style="font-family:var(--body-font);font-size:.9rem;color:var(--terra);font-weight:600">{{ p.sold }} шт.</td></tr>
+                {% empty %}<tr><td colspan="2" style="font-family:var(--body-font);color:var(--bark)">Нет данных</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+</div>
+
+<div class="card p-3">
+    <h6 style="font-family:var(--serif);font-weight:700;color:var(--choco);margin-bottom:12px">Все клиенты (алфавитный порядок)</h6>
+    <div class="table-responsive">
+    <table class="table table-sm table-terra">
+        <thead><tr><th>ФИО</th><th>Телефон</th><th>Адрес</th><th>Заказов</th><th>Сумма покупок</th></tr></thead>
+        <tbody>
+        {% for c in customers_stats %}
+        <tr>
+            <td style="font-family:var(--body-font);font-size:.88rem">{{ c.full_name }}</td>
+            <td style="font-family:var(--body-font);font-size:.88rem;color:var(--bark)">{{ c.phone }}</td>
+            <td style="font-family:var(--body-font);font-size:.88rem;color:var(--bark)">{{ c.address }}</td>
+            <td style="font-family:var(--body-font);font-size:.88rem">{{ c.orders_cnt|default:0 }}</td>
+            <td style="font-family:var(--serif);font-weight:700;color:var(--terra)">{{ c.total|default:0|floatformat:2 }} руб.</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+const STATUS_L = {new:'Новый',processing:'В обработке',ready:'Готов',delivering:'Доставляется',delivered:'Доставлен',cancelled:'Отменён'};
+const DEL_L = {pickup:'Самовывоз',delivery:'Доставка'};
+const COLORS = ['#C1440E','#E8956D','#7A4F2D','#F2E8D9','#3B2314','#D4956A'];
+
+const byStatus = JSON.parse('{{ by_status|escapejs }}');
+const byDelivery = JSON.parse('{{ by_delivery|escapejs }}');
+const byType = JSON.parse('{{ by_type|escapejs }}');
+const monthly = JSON.parse('{{ monthly|escapejs }}');
+
+new Chart(document.getElementById('statusChart'), {type:'doughnut',data:{labels:byStatus.map(d=>STATUS_L[d.status]||d.status),datasets:[{data:byStatus.map(d=>d.cnt),backgroundColor:COLORS,borderWidth:0}]},options:{plugins:{legend:{position:'bottom',labels:{font:{family:'Lora, Georgia, serif'},boxWidth:12}}}}});
+new Chart(document.getElementById('deliveryChart'), {type:'pie',data:{labels:byDelivery.map(d=>DEL_L[d.delivery_type]||d.delivery_type),datasets:[{data:byDelivery.map(d=>d.cnt),backgroundColor:['#C1440E','#7A4F2D'],borderWidth:0}]},options:{plugins:{legend:{position:'bottom',labels:{font:{family:'Lora, Georgia, serif'},boxWidth:12}}}}});
+new Chart(document.getElementById('typeChart'), {type:'bar',data:{labels:byType.map(d=>d.product_type__name),datasets:[{label:'Изделий',data:byType.map(d=>d.cnt),backgroundColor:'#C1440E',hoverBackgroundColor:'#3B2314',borderRadius:3}]},options:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{font:{family:'Lora, Georgia, serif'}}},x:{ticks:{font:{family:'Lora, Georgia, serif'}}}}}});
+
+if(monthly.length>0){
+new Chart(document.getElementById('monthlyChart'), {type:'line',data:{
+    labels:monthly.map(d=>{if(!d.month)return'';const p=d.month.split('/');if(p.length===2){const m=['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];return m[parseInt(p[0])-1]+' '+p[1];}return d.month;}),
+    datasets:[
+        {label:'Выручка (руб.)',data:monthly.map(d=>d.total||0),borderColor:'#C1440E',backgroundColor:'rgba(193,68,14,0.08)',fill:true,tension:.3,yAxisID:'y'},
+        {label:'Заказов',data:monthly.map(d=>d.cnt),borderColor:'#7A4F2D',tension:.3,yAxisID:'y1'}
+    ]},options:{scales:{y:{beginAtZero:true,position:'left',ticks:{font:{family:'Lora, Georgia, serif'}}},y1:{beginAtZero:true,position:'right',grid:{drawOnChartArea:false},ticks:{font:{family:'Lora, Georgia, serif'}}}},plugins:{legend:{labels:{font:{family:'Lora, Georgia, serif'}}}}}});
+}
+</script>
+{% endblock %}
