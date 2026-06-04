@@ -637,6 +637,16 @@ def statistics(request):
         return redirect('shop:product_list')
 
     from django.db.models.functions import TruncMonth
+    from django.db.models import Sum, Count, Avg
+    from django.core.paginator import Paginator
+    import calendar as cal_module
+    import statistics as _stats
+    import io
+    import base64
+    import matplotlib
+    matplotlib.use('Agg')
+    import matplotlib.pyplot as plt
+    import matplotlib.ticker as ticker
 
     delivered = Order.objects.filter(status='delivered')
     total_revenue = delivered.aggregate(s=Sum('total_price'))['s'] or 0
@@ -677,7 +687,6 @@ def statistics(request):
             result.append(row)
         return _json.dumps(result)
 
-    import statistics as _stats
     amounts = list(delivered.values_list('total_price', flat=True))
     amounts_float = [float(a) for a in amounts]
     median_order = round(_stats.median(amounts_float), 2) if amounts_float else 0
@@ -692,6 +701,86 @@ def statistics(request):
     ages = [(today - u.birth_date).days // 365 for u in users_bd]
     avg_age = round(_stats.mean(ages), 1) if ages else 0
     median_age = round(_stats.median(ages), 1) if ages else 0
+
+    # ========== ГРАФИКИ MATPLOTLIB (ВСТРАИВАЕМ В СТАТИСТИКУ) ==========
+    # График 1: выручка и количество заказов по месяцам
+    if monthly:
+        months = [d['month'].strftime('%m/%Y') for d in monthly]
+        totals = [float(d['total'] or 0) for d in monthly]
+        counts = [d['cnt'] for d in monthly]
+    else:
+        months = ['01/2024','02/2024','03/2024','04/2024','05/2024','06/2024']
+        totals = [1200, 1800, 1500, 2200, 1900, 2500]
+        counts = [8, 12, 10, 15, 13, 17]
+
+    fig, axes = plt.subplots(1, 2, figsize=(13, 5))
+    fig.suptitle('Статистика кондитерской (matplotlib)', fontsize=13, fontweight='bold')
+
+    axes[0].bar(months, totals, color='#d63384', alpha=0.8)
+    axes[0].set_title('Выручка по месяцам (руб.)')
+    axes[0].set_ylabel('Выручка (руб.)')
+    axes[0].tick_params(axis='x', rotation=45)
+    axes[0].yaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f'{x:,.0f}'))
+    for i, v in enumerate(totals):
+        axes[0].text(i, v + 10, f'{v:.0f}', ha='center', fontsize=8)
+
+
+    axes[1].plot(months, counts, marker='o', color='#f06eaa', linewidth=2, markersize=7)
+    axes[1].fill_between(range(len(months)), counts, alpha=0.2, color='#f06eaa')
+    axes[1].set_title('Количество доставленных заказов')
+    axes[1].set_ylabel('Кол-во заказов')
+    axes[1].tick_params(axis='x', rotation=45)
+
+    plt.tight_layout()
+    buf1 = io.BytesIO()
+    plt.savefig(buf1, format='png', dpi=100, bbox_inches='tight')
+    buf1.seek(0)
+    chart1_b64 = base64.b64encode(buf1.read()).decode()
+    plt.close(fig)
+
+    # График 2: количество изделий по видам (горизонтальная гистограмма)
+    if by_type:
+        type_names = [d['product_type__name'] for d in by_type]
+        type_counts = [d['cnt'] for d in by_type]
+    else:
+        type_names = ['Торты', 'Пирожные', 'Конфеты', 'Печенье', 'Зефир']
+        type_counts = [15, 12, 20, 8, 6]
+
+    colors = ['#d63384','#f06eaa','#b02870','#e85a9b','#f491c0','#fac4dd','#fddbeb','#fce4f3']
+    fig2, ax = plt.subplots(figsize=(8, 5))
+    bars = ax.barh(type_names, type_counts, color=colors[:len(type_names)], alpha=0.85)
+    ax.set_title('Количество изделий по видам', fontsize=13)
+    ax.set_xlabel('Количество позиций')
+    for bar, val in zip(bars, type_counts):
+        ax.text(bar.get_width() + 0.2, bar.get_y() + bar.get_height()/2,
+                str(val), va='center', fontweight='bold')
+    plt.tight_layout()
+    buf2 = io.BytesIO()
+    plt.savefig(buf2, format='png', dpi=100, bbox_inches='tight')
+    buf2.seek(0)
+    chart2_b64 = base64.b64encode(buf2.read()).decode()
+    plt.close(fig2)
+
+    # График 3: топ-5 изделий по продажам (круговая диаграмма)
+    top = OrderItem.objects.values('product__name').annotate(
+        sold=Sum('quantity')).order_by('-sold')[:5]
+    if top:
+        top_names = [d['product__name'] for d in top]
+        top_vals = [d['sold'] for d in top]
+    else:
+        top_names = ['Наполеон', 'Медовик', 'Эклеры', 'Трюфели', 'Безе']
+        top_vals = [45, 38, 30, 25, 18]
+
+    fig3, ax3 = plt.subplots(figsize=(7, 5))
+    ax3.pie(top_vals, labels=top_names, autopct='%1.1f%%',
+            colors=colors[:len(top_names)], startangle=90)
+    ax3.set_title('Топ-5 изделий по количеству продаж', fontsize=12)
+    plt.tight_layout()
+    buf3 = io.BytesIO()
+    plt.savefig(buf3, format='png', dpi=100, bbox_inches='tight')
+    buf3.seek(0)
+    chart3_b64 = base64.b64encode(buf3.read()).decode()
+    plt.close(fig3)
 
     context = {
         'total_revenue': total_revenue,
@@ -713,8 +802,12 @@ def statistics(request):
         'utc_now': utc_now,
         'local_now': local_now,
         'text_calendar': text_calendar,
+        'chart1_b64': chart1_b64,
+        'chart2_b64': chart2_b64,
+        'chart3_b64': chart3_b64,
     }
     return render(request, 'shop/statistics.html', context)
+
 
 
 # ═══════════════════════════════ ГРАФИК MATPLOTLIB ═══════════════════════
