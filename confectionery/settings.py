@@ -29,6 +29,8 @@ INSTALLED_APPS = [
     'crispy_forms',
     'crispy_bootstrap5',
     'rest_framework',
+    'cloudinary_storage', 
+    'cloudinary',
     'main',
     'shop',
     'users',
@@ -130,3 +132,19 @@ LOGGING = {
         'shop': {'handlers': ['console', 'file'], 'level': LOG_LEVEL, 'propagate': False},
     },
 }
+
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
+
+# Загружаем настройки из переменных окружения
+cloudinary.config(
+    cloud_name=os.getenv('CLOUDINARY_CLOUD_NAME'),
+    api_key=os.getenv('CLOUDINARY_API_KEY'),
+    api_secret=os.getenv('CLOUDINARY_API_SECRET'),
+    secure=True
+)
+
+# Определяем, где хранить загруженные файлы
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
