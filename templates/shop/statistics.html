@@ -6,6 +6,13 @@
     <h2>Статистика кондитерской</h2>
 </div>
 
+<!-- Кнопка перехода к графикам matplotlib -->
+<div class="mb-4">
+    <a href="{% url 'shop:chart_python' %}" class="btn btn-primary">
+        <i class="bi bi-graph-up"></i> Посмотреть графики (matplotlib)
+    </a>
+</div>
+
 <!-- Timezone & calendar -->
 <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:24px;margin-bottom:32px">
     <div style="border-left:3px solid var(--sand);padding-left:16px">
@@ -22,12 +29,12 @@
     </div>
     <div style="border-left:3px solid var(--sand);padding-left:16px;display:flex;align-items:center">
         <a href="{% url 'shop:chart_python' %}" class="btn-terra" style="font-size:.85rem;padding:10px 20px;width:100%;text-align:center">
-            <i class="bi bi-graph-up me-1"></i> Отдельные графики
+            <i class="bi bi-bar-chart"></i> Графики Python
         </a>
     </div>
 </div>
 
-<!-- KPI -->
+<!-- KPI карточки -->
 <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:24px;margin-bottom:40px">
     <div class="kpi-card">
         <div class="kpi-num">{{ delivered_count }}</div>
@@ -47,33 +54,7 @@
     </div>
 </div>
 
-<!-- Графики matplotlib -->
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="card p-3">
-            <h5>📊 Выручка и количество заказов по месяцам (matplotlib)</h5>
-            <img src="data:image/png;base64,{{ chart1_b64 }}" class="img-fluid" alt="График выручки">
-        </div>
-    </div>
-</div>
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="card p-3">
-            <h5>📈 Количество изделий по видам (matplotlib)</h5>
-            <img src="data:image/png;base64,{{ chart2_b64 }}" class="img-fluid" alt="График изделий">
-        </div>
-    </div>
-</div>
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="card p-3">
-            <h5>🥧 Топ-5 изделий по продажам (matplotlib)</h5>
-            <img src="data:image/png;base64,{{ chart3_b64 }}" class="img-fluid" alt="Круговая диаграмма">
-        </div>
-    </div>
-</div>
-
-<!-- Таблицы -->
+<!-- Таблица топ-10 изделий -->
 <div class="card p-3 mb-4">
     <h6 style="font-family:var(--serif);font-weight:700;color:var(--choco);margin-bottom:12px">Топ-10 изделий по продажам</h6>
     <table class="table table-sm table-terra">
@@ -82,17 +63,14 @@
         </thead>
         <tbody>
             {% for p in top_products %}
-            <tr>
-                <td>{{ p.product__name }}</td>
-                <td>{{ p.sold }} шт.</td>
-            </tr>
-            {% empty %}
-            <tr><td colspan="2">Нет данных</td></tr>
-            {% endfor %}
+            <tr><td>{{ p.product__name }}</td><td>{{ p.sold }} шт.</td></tr>
+            {% empty %}<tr><td colspan="2">Нет данных</td></tr>{% endfor %}
         </tbody>
     </table>
 </div>
 
+
+<!-- Все клиенты (алфавитный порядок) -->
 <div class="card p-3">
     <h6 style="font-family:var(--serif);font-weight:700;color:var(--choco);margin-bottom:12px">Все клиенты (алфавитный порядок)</h6>
     <div class="table-responsive">
